@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0">
+    <title>Snake</title>
+</head>
+<style type="text/css">
+    table {
+        width: 400px;
+        height: 400px;
+    }
+    td {
+        width: 10px;
+        height: 10px;
+        font-size: 10px;
+    }
+    .snakeBody {
+        background-color: yellow;
+    }
+    .candy {
+        background-color: red;
+    }
+</style>
+
+<body>
+    <div align="center">
+        <h1>Snake</h1>
+        <h3>-Press Enter to start-</h3>
+        <h3>-Press Backspace to reset-</h3>
+        <button type="button" id="startBtn" onclick="start()">Start</button>
+        <button type="button" id="resetBtn" onclick="javascript:window.location.reload();">Reset</button>
+
+        <table border="1" id="table">
+
+        </table>
+        <span>Score: </span><span id="score">0</span>
+    </div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="jquery.touchSwipe.min.js"></script>
+    <script type="text/javascript">
+        var token = "nothing";
+        var bodyArray = [];
+        var x = 9;
+        var candy;
+        var timer = 500;
+        var count = 0;
+        var score = 0;
+
+        $(document).ready(function () {
+            var template = '';
+            for (var i = 1; i <= x; i++) {
+                template += '<tr align="center">';
+                for (var j = 1; j <= x; j++) {
+                    template += '<td id="' + i + "_" + j + '"></td>';
+                }
+                template += '</tr>';
+            }
+            $("#table").html(template);
+            document.onkeydown = function (e) {
+                if (e.which == 13) {
+                    start();
+                }
+            }
+
+            //console.log(bodyArray[0].getNode());
+        });
+
+        function start() {
+            $("#table").swipe({
+                swipe: function (event, direction, distance, duration, fingerCount) {
+                    switch (direction) {
+                    case 'right':
+                        token = 'right';
+                        break
+
+                    case 'left':
+                        token = 'left';
+                        break;
+                    case 'up':
+                        token = 'up';
+                        break;
+                    case 'down':
+                        token = 'down';
+                        break;
+                    }
+                }
+            });
+
+            $("#startBtn").attr('disabled', 'true');
+            var random1 = Math.floor(Math.random() * 10000 % x) + 1;
+            var random2 = Math.floor(Math.random() * 10000 % x) + 1;
+            node = nodeMaker(random1, random2);
+            bodyArray.push(node);
+            $(node).addClass('snakeBody');
+            makeCandy();
+            document.onkeydown = function () {
+                switch (window.event.keyCode) {
+                case 37:
+                    token = "left";
+                    //console.log('left');
+                    break;
+                case 38:
+                    token = "up";
+                    //console.log('up');
+                    break;
+                case 39:
+                    token = "right";
+                    //console.log('right');
+                    break;
+                case 40:
+                    token = "down";
+                    //console.log('down');
+                    break;
+                case 8:
+                    window.location.reload();
+                    break;
+                }
+            };
+
+            refreshIntervalId = setInterval(running, timer);
+        }
+
+
+        var running = function () {
+            switch (token) {
+            case "up":
+                document.onkeydown = function (e) {
+                    switch (window.event.keyCode) {
+                    case 37:
+                        token = "left";
+                        //console.log('left');
+                        break;
+                    case 38:
+                        token = "up";
+                        //console.log('up');
+                        break;
+                    case 39:
+                        token = "right";
+                        //console.log('right');
+                        break;
+                    case 40:
+                        return false;
+                        break;
+                    case 8:
+                        window.location.reload();
+                        break;
+                    }
+                };
+                var a = Number(getA(node)) - 1;
+                var b = getB(node);
+                node = nodeMaker(a, b);
+                process();
+                break;
+            case "right":
+                document.onkeydown = function (e) {
+                    switch (window.event.keyCode) {
+                    case 37:
+                        return false;
+                        break;
+                    case 38:
+                        token = "up";
+                        //console.log('up');
+                        break;
+                    case 39:
+                        token = "right";
+                        //console.log('right');
+                        break;
+                    case 40:
+                        token = "down";
+                        //console.log('down');
+                        break;
+                    case 8:
+                        window.location.reload();
+                        break;
+                    }
+                };
+                var a = getA(node);
+                var b = Number(getB(node)) + 1;
+                node = nodeMaker(a, b);
+                process();
+                break;
+            case "down":
+                document.onkeydown = function (e) {
+                    switch (window.event.keyCode) {
+                    case 37:
+                        token = "left";
+                        //console.log('left');
+                        break;
+                    case 38:
+                        return false;
+                        break;
+                    case 39:
+                        token = "right";
+                        //console.log('right');
+                        break;
+                    case 40:
+                        token = "down";
+                        //console.log('down');
+                        break;
+                    case 8:
+                        window.location.reload();
+                        break;
+                    }
+                };
+                var a = Number(getA(node)) + 1;
+                var b = getB(node);
+                node = nodeMaker(a, b);
+                process();
+                break;
+            case "left":
+                document.onkeydown = function (e) {
+                    switch (window.event.keyCode) {
+                    case 37:
+                        token = "left";
+                        //console.log('left');
+                        break;
+                    case 38:
+                        token = "up";
+                        //console.log('up');
+                        break;
+                    case 39:
+                        return false;
+                        break;
+                    case 40:
+                        token = "down";
+                        //console.log('down');
+                        break;
+                    case 8:
+                        window.location.reload();
+                        break;
+                    }
+                };
+                var a = getA(node);
+                var b = Number(getB(node)) - 1;
+                node = nodeMaker(a, b);
+                process();
+                break;
+            }
+        }
+
+        function makeCandy() {
+            var random1 = Math.floor(Math.random() * 10000 % x) + 1;
+            var random2 = Math.floor(Math.random() * 10000 % x) + 1;
+            var temp = nodeMaker(random1, random2);
+            if ($.inArray(temp, bodyArray) == -1) {
+                candy = temp;
+                $(candy).addClass('candy');
+            } else {
+                makeCandy();
+            }
+        }
+
+        function nodeMaker(a, b) {
+            var temp = "#" + a + "_" + b;
+            return temp;
+        }
+
+        function getA(node) {
+            var indexA = node.indexOf("_");
+            var a = node.slice(1, indexA);
+            return a;
+        }
+
+        function getB(node) {
+            var indexB = node.indexOf("_") + 1;
+            var b = node.substr(indexB);
+            return b;
+        }
+
+        function process() {
+            if (Number(getA(node)) >= 1 && Number(getA(node)) <= x && Number(getB(node)) >= 1 && Number(getB(node)) <= x) {
+                if ($.inArray(node, bodyArray) == -1) {
+                    if (node == candy) {
+                        console.log("eat");
+                        score++;
+                        count++;
+                        $("#score").text(score);
+                        clearInterval(refreshIntervalId);
+                        if (timer > 100 && count % 5 == 0) {
+                            timer = timer - 100;
+                        }
+                        refreshIntervalId = setInterval(running, timer);
+                        $(node).addClass('snakeBody');
+                        bodyArray.push(node);
+                        $(candy).removeClass('candy');
+                        makeCandy();
+                    } else {
+                        $(node).addClass('snakeBody');
+                        bodyArray.push(node);
+                        $(bodyArray[0]).removeClass('snakeBody');
+                        bodyArray.splice(0, 1);
+                    }
+                } else {
+                    alert("Game Over for crushing yourself");
+                    clearInterval(refreshIntervalId);
+                }
+            } else {
+                alert("Game Over for hitting walls");
+                clearInterval(refreshIntervalId);
+            }
+            console.log(node);
+        }
+    </script>
+</body>
+
+</html>
